@@ -24,6 +24,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Internal as BS
 import Control.Monad as CM
 import Foreign
+import System.IO.Unsafe
 
 import Data.IntervalSet.Internal as S
 
@@ -45,7 +46,7 @@ import Data.IntervalSet.Internal as S
 fromByteString :: ByteString -> IntSet
 fromByteString bs =
     let (fptr, off, len) = BS.toForeignPtr bs in
-    BS.inlinePerformIO $ withForeignPtr fptr $ \_ptr -> do
+    unsafeDupablePerformIO $ withForeignPtr fptr $ \_ptr -> do
       let ptr = _ptr `advancePtr` off
       let !s = goFrom (castPtr ptr) len
       return $! s
@@ -57,7 +58,7 @@ fromByteString bs =
         go :: Int -> IntSet -> IntSet
         go !x !acc
           |  x + wordSize <= len  = do
-            let !bm = BS.inlinePerformIO (peekByteOff ptr x) -- TODO read little endian
+            let !bm = unsafeDupablePerformIO (peekByteOff ptr x) -- TODO read little endian
             let !s  = unionBM (x * wordSize) bm acc
             go (x + wordSize) s
           | otherwise = goBytes x acc
@@ -67,7 +68,7 @@ fromByteString bs =
         goBytes :: Int -> IntSet -> IntSet
         goBytes !i !s
           |   i < len =
-            let wbm = BS.inlinePerformIO (peekByteOff ptr i)
+            let wbm = unsafeDupablePerformIO (peekByteOff ptr i)
                 s'  = foldrWord (i * 8) insert s wbm
             in  goBytes (i + 1)  s'
           | otherwise = s

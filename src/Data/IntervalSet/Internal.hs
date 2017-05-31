@@ -123,7 +123,7 @@ import Data.Data
 import qualified Data.List as L
 import Data.Monoid
 import Data.Ord
-import Data.Word
+import Prelude
 
 
 -- machine specific properties of basic types
