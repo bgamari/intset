@@ -1195,12 +1195,12 @@ listFin p m = [p..(p + m) - 1]
 --
 fromList :: [Key] -> IntSet
 fromList = L.foldl' (flip insert) empty
-{-# NOINLINE [3] fromList #-}
+{-# NOINLINE [2] fromList #-}
 
 -- | /O(n)/. Convert the set to a list of its elements.
 toList :: IntSet -> [Key]
 toList = Data.IntervalSet.Internal.foldr (:) []
-{-# NOINLINE [3] toList #-}
+{-# NOINLINE [2] toList #-}
 
 
 -- | 'elems' is alias to 'toList' for compatibility.
