@@ -119,7 +119,6 @@ module Data.IntervalSet.Internal
 
 import Control.DeepSeq
 import Data.Bits as Bits
-import Data.Bits.Extras
 import Data.Data
 import qualified Data.List as L
 import Data.Monoid
@@ -286,6 +285,7 @@ instance Bounded IntSet where
   maxBound = universe
 
 instance NFData IntSet where
+  rnf x = x `seq` ()
 
 {--------------------------------------------------------------------
   Monoids
@@ -1085,7 +1085,7 @@ findMin (Fin p _)  = p
 findMin  Nil       = error "findMin: empty set"
 
 findMinBM :: BitMap -> Int
-findMinBM = fromIntegral . trailingZeros
+findMinBM = fromIntegral . countTrailingZeros
 {-# INLINE findMinBM #-}
 
 
@@ -1107,7 +1107,7 @@ findMax (Fin p m ) = p + m - 1
 findMax  Nil       = error "findMax: empty set"
 
 findMaxBM :: BitMap -> Int
-findMaxBM x = fromIntegral ((WORD_SIZE_IN_BITS - 1) - leadingZeros x)
+findMaxBM x = fromIntegral ((WORD_SIZE_IN_BITS - 1) - countLeadingZeros x)
 {-# INLINE findMaxBM #-}
 
 {--------------------------------------------------------------------
