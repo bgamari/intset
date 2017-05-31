@@ -1517,7 +1517,7 @@ finMask m = m `shiftR` 1
 ----------------------------------------------------------------------}
 
 suffixBitMask :: Int
-suffixBitMask = bitSize (undefined :: Word) - 1
+suffixBitMask = finiteBitSize (undefined :: Word) - 1
 {-# INLINE suffixBitMask #-}
 
 prefixBitMask :: Int
