@@ -119,10 +119,12 @@ module Data.IntervalSet.Internal
 
 import Control.DeepSeq
 import Data.Bits as Bits
+import Data.Coerce
 import Data.Data
 import qualified Data.List as L
 import Data.Monoid
 import Data.Ord
+import Data.Semigroup
 import Prelude
 
 
@@ -265,6 +267,9 @@ instance Ord IntSet where
   compare = comparing toList
   -- TODO make it faster
 
+instance Semigroup IntSet where
+  (<>) = union
+
 instance Monoid IntSet where
   mempty  = empty
   mappend = union
@@ -298,10 +303,14 @@ instance NFData IntSet where
 newtype Union = Union { getUnion :: IntSet }
                 deriving (Show, Read, Eq, Ord)
 
+instance Semigroup Union where
+  a <> b      = Union (getUnion a `union` getUnion b)
+  sconcat     = Union . sconcat . coerce
+
 instance Monoid Union where
   mempty      = Union empty
   mappend a b = Union (getUnion a `union` getUnion b)
-  mconcat     = Union . unions . L.map getUnion
+  mconcat     = Union . unions . coerce
 
 -- | Monoid under 'intersection'.
 --
@@ -310,10 +319,13 @@ instance Monoid Union where
 newtype Intersection = Intersection { getIntersection :: IntSet }
                        deriving (Show, Read, Eq, Ord)
 
+instance Semigroup Intersection where
+  a <> b      = Intersection (getIntersection a `intersection` getIntersection b)
+
 instance Monoid Intersection where
   mempty      = Intersection universe
   mappend a b = Intersection (getIntersection a `intersection` getIntersection b)
-  mconcat     = Intersection . intersections . L.map getIntersection
+  mconcat     = Intersection . intersections . coerce
 
 -- | Monoid under 'symDiff'.
 --
@@ -321,6 +333,9 @@ instance Monoid Intersection where
 --
 newtype Difference = Difference { getDifference :: IntSet }
                      deriving (Show, Read, Eq, Ord)
+
+instance Semigroup Difference where
+  a <> b      = Difference (getDifference a `symDiff` getDifference b)
 
 instance Monoid Difference where
   mempty      = Difference empty
